@@ -7,12 +7,37 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/question1Header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/answer1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="check"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toEndOf="@id/answer1"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
