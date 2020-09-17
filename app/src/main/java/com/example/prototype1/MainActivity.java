@@ -9,21 +9,16 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.security.InvalidKeyException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 
 public class MainActivity extends AppCompatActivity {
 
     Button button;
     EditText editText;
     TextView textView;
-
+    String string;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,30 +32,20 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 try {
+                    string = editText.getText().toString();
                     toHash();
-                } catch (BadPaddingException e) {
-                    e.printStackTrace();
-                } catch (IllegalBlockSizeException e) {
-                    e.printStackTrace();
-                } catch (NoSuchPaddingException e) {
-                    e.printStackTrace();
                 } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (InvalidKeyException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
 
-    private void toHash() throws BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        String string = editText.getText().toString();
+    private void toHash() throws NoSuchAlgorithmException {
         Log.v("EditText", string);
-        byte[] plaintext = string.getBytes();
-
-        Cipher c = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-        c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(new byte[16], "DESede"));
-        byte[] cipherText = c.doFinal(plaintext);
-        textView.setText(cipherText.toString());
+        MessageDigest msg = MessageDigest.getInstance("MD5");
+        msg.update(string.getBytes(), 0, string.length());
+        String digest1 = new BigInteger(1, msg.digest()).toString(16).substring(0, 16);
+        textView.setText("MD5 substring(0, 16) "+digest1);
     }
 }
