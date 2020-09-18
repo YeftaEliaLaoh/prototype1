@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.bouncycastle.crypto.digests.Blake2bDigest;
+import org.bouncycastle.crypto.digests.Blake2sDigest;
 import org.kocakosm.jblake2.Blake2b;
 import org.kocakosm.jblake2.Blake2s;
 
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewFnv;
     TextView textViewSipHash;
     TextView textViewBlake2;
+    TextView textViewBlake2Digest;
     TextView textViewDrmId;
     String string;
 
@@ -41,12 +44,14 @@ public class MainActivity extends AppCompatActivity {
         textViewFnv = findViewById(R.id.textViewFnv);
         textViewSipHash = findViewById(R.id.textViewSipHash);
         textViewBlake2 = findViewById(R.id.textViewBlake2);
+        textViewBlake2Digest = findViewById(R.id.textViewBlake2Digest);
         textViewDrmId = findViewById(R.id.textViewDrmId);
 
         textViewMd5.setTextIsSelectable(true);
         textViewFnv.setTextIsSelectable(true);
         textViewSipHash.setTextIsSelectable(true);
         textViewBlake2.setTextIsSelectable(true);
+        textViewBlake2Digest.setTextIsSelectable(true);
         textViewDrmId.setTextIsSelectable(true);
 
         button = findViewById(R.id.button_id);
@@ -59,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                     toFnv();
                     toSipHash();
                     toBlake2();
+                    toBlake2Digest();
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
@@ -66,13 +72,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void toBlake2Digest() {
+        Blake2bDigest blake2bDigest = new Blake2bDigest(8);
+        blake2bDigest.reset();
+        blake2bDigest.update(string.getBytes(),0,string.length());
+        //String digest1 = new BigInteger(1, blake2bDigest.).toString(16);
+
+        Blake2sDigest blake2sDigest = new Blake2sDigest(8);
+        blake2sDigest.reset();
+        blake2sDigest.update(string.getBytes(),0,string.length());
+        //textViewBlake2Digest.setText("blake2bDigest " + digest1.length() + " " + digest1+" blake2s " + digest2.length() + " " + digest2);
+
+    }
+
     private void toBlake2() {
         Blake2b blake2b = new Blake2b(64);
+        blake2b.reset();
         blake2b.update(string.getBytes());
         String digest1 = new BigInteger(1, blake2b.digest()).toString(16);//new String(blake2b.digest());
 
         Blake2s blake2s = new Blake2s(8);
-        blake2b.update(string.getBytes());
+        blake2s.reset();
+        blake2s.update(string.getBytes());
         String digest2 = new BigInteger(1, blake2s.digest()).toString(16);
 
         textViewBlake2.setText("blake2b " + digest1.length() + " " + digest1+" blake2s " + digest2.length() + " " + digest2);
@@ -84,11 +105,20 @@ public class MainActivity extends AppCompatActivity {
         try {
             MediaDrm mediaDrm = new MediaDrm(wideVineUuid);
             byte[] wideVineId = mediaDrm.getPropertyByteArray(MediaDrm.PROPERTY_DEVICE_UNIQUE_ID);
-            MessageDigest msg = MessageDigest.getInstance("MD5");
-            msg.update(wideVineId, 0, string.length());
-            String digest1 = new BigInteger(1, msg.digest()).toString(16);
-            textViewDrmId.setText("DRM id " + digest1);
-            //textView4.setText("DRM id " + Base64.encodeToString(wideVineId,Base64.DEFAULT).trim());
+            Blake2b blake2b = new Blake2b(64);
+            blake2b.reset();
+            blake2b.update(wideVineId);
+            String digest1 = new BigInteger(1, blake2b.digest()).toString(16);//new String(blake2b.digest());
+
+            Blake2s blake2s = new Blake2s(8);
+            blake2s.reset();
+            blake2s.update(wideVineId);
+            String digest2 = new BigInteger(1, blake2s.digest()).toString(16);
+
+            //textViewDrmId.setText("DRM id blake2s " + digest2.length() + " " + digest2);
+            textViewDrmId.setText("DRM id " + digest1.length() + " " + digest1+" blake2s " + digest2.length() + " " + digest2);
+            //textViewDrmId.setText("DRM id " + digest1);
+            //textViewDrmId.setText("DRM id " + Base64.encodeToString(wideVineId,Base64.DEFAULT).trim());
         } catch (Exception e) {
             e.printStackTrace();
         }

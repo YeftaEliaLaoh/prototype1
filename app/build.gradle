@@ -28,6 +28,7 @@ dependencies {
 
     implementation group: 'io.whitfin', name: 'siphash', version: '2.0.0'
     implementation group: 'org.kocakosm', name: 'jblake2', version: '0.4'
+    implementation group: 'org.bouncycastle', name: 'bcprov-ext-jdk15on', version: '1.65'
 
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
