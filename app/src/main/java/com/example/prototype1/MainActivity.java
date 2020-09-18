@@ -2,7 +2,6 @@ package com.example.prototype1;
 
 import android.media.MediaDrm;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +9,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.kocakosm.jblake2.Blake2b;
+import org.kocakosm.jblake2.Blake2s;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -22,10 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
     Button button;
     EditText editText;
-    TextView textView1;
-    TextView textView2;
-    TextView textView3;
-    TextView textView4;
+    TextView textViewMd5;
+    TextView textViewFnv;
+    TextView textViewSipHash;
+    TextView textViewBlake2;
+    TextView textViewDrmId;
     String string;
 
     @Override
@@ -34,15 +37,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         editText = findViewById(R.id.answer1);
-        textView1 = findViewById(R.id.question1Header);
-        textView2 = findViewById(R.id.question2Header);
-        textView3 = findViewById(R.id.question3Header);
-        textView4 = findViewById(R.id.question4Header);
+        textViewMd5 = findViewById(R.id.textViewMd5);
+        textViewFnv = findViewById(R.id.textViewFnv);
+        textViewSipHash = findViewById(R.id.textViewSipHash);
+        textViewBlake2 = findViewById(R.id.textViewBlake2);
+        textViewDrmId = findViewById(R.id.textViewDrmId);
 
-        textView1.setTextIsSelectable(true);
-        textView2.setTextIsSelectable(true);
-        textView3.setTextIsSelectable(true);
-        textView4.setTextIsSelectable(true);
+        textViewMd5.setTextIsSelectable(true);
+        textViewFnv.setTextIsSelectable(true);
+        textViewSipHash.setTextIsSelectable(true);
+        textViewBlake2.setTextIsSelectable(true);
+        textViewDrmId.setTextIsSelectable(true);
 
         button = findViewById(R.id.button_id);
         button.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                     toHash();
                     toFnv();
                     toSipHash();
+                    toBlake2();
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
@@ -60,17 +66,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void toBlake2() {
+        Blake2b blake2b = new Blake2b(64);
+        blake2b.update(string.getBytes());
+        String digest1 = new BigInteger(1, blake2b.digest()).toString(16);//new String(blake2b.digest());
+
+        Blake2s blake2s = new Blake2s(8);
+        blake2b.update(string.getBytes());
+        String digest2 = new BigInteger(1, blake2s.digest()).toString(16);
+
+        textViewBlake2.setText("blake2b " + digest1.length() + " " + digest1+" blake2s " + digest2.length() + " " + digest2);
+
+    }
+
     void getUniqueID() {
         UUID wideVineUuid = new UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L);
         try {
             MediaDrm mediaDrm = new MediaDrm(wideVineUuid);
             byte[] wideVineId = mediaDrm.getPropertyByteArray(MediaDrm.PROPERTY_DEVICE_UNIQUE_ID);
-            //MessageDigest md = MessageDigest.getInstance("SHA-256");
-            //md.update(wideVineId);
-            //textView4.setText("DRM id " + md.digest().toString());
-            long sipHasher = SipHasher.hash("0123456789ABCDEF".getBytes(), wideVineId, 2, 4);
-            textView4.setText("DRM id " + sipHasher);
-
+            MessageDigest msg = MessageDigest.getInstance("MD5");
+            msg.update(wideVineId, 0, string.length());
+            String digest1 = new BigInteger(1, msg.digest()).toString(16);
+            textViewDrmId.setText("DRM id " + digest1);
             //textView4.setText("DRM id " + Base64.encodeToString(wideVineId,Base64.DEFAULT).trim());
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,12 +96,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void toSipHash() {
         long sipHasher = SipHasher.hash("0123456789ABCDEF".getBytes(), string.getBytes(), 2, 4);
-        textView3.setText("SipHasher " + sipHasher);
+        textViewSipHash.setText("SipHasher " + sipHasher);
     }
 
     private void toFnv() {
         FNV fnv = new FNV();
-        textView2.setText("FNV 64 bit " + fnv.fnv1a_32(string.getBytes()));
+        textViewFnv.setText("FNV 64 bit " + fnv.fnv1a_32(string.getBytes()));
     }
 
     private void toHash() throws NoSuchAlgorithmException {
@@ -92,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         MessageDigest msg = MessageDigest.getInstance("MD5");
         msg.update(string.getBytes(), 0, string.length());
         String digest1 = new BigInteger(1, msg.digest()).toString(16).substring(0, 16);
-        textView1.setText("MD5 substring(0, 16) " + digest1);
+        textViewMd5.setText("MD5 substring(0, 16) " + digest1);
 
     }
 }
