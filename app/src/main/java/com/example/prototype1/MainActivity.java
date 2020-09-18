@@ -68,8 +68,10 @@ public class MainActivity extends AppCompatActivity {
             //MessageDigest md = MessageDigest.getInstance("SHA-256");
             //md.update(wideVineId);
             //textView4.setText("DRM id " + md.digest().toString());
+            long sipHasher = SipHasher.hash("0123456789ABCDEF".getBytes(), wideVineId, 2, 4);
+            textView4.setText("DRM id " + sipHasher);
 
-            textView4.setText("DRM id " + Base64.encodeToString(wideVineId,Base64.DEFAULT).trim());
+            //textView4.setText("DRM id " + Base64.encodeToString(wideVineId,Base64.DEFAULT).trim());
         } catch (Exception e) {
             e.printStackTrace();
         }
